@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SOCCER24 · Админ-панель</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body class="admin-body">
+  <div class="admin-bg" aria-hidden="true"></div>
+
+  <div id="admin-gate" class="admin-gate">
+    <div class="admin-gate__card">
+      <div class="logo logo--sm" style="margin-bottom:1rem">
+        <span class="logo__mark"></span>
+        <span class="logo__text">SOCCER<span>24</span></span>
+      </div>
+      <h1>Админ-панель</h1>
+      <p>Модерация чата, трансляции и подписки</p>
+      <form id="admin-login" class="auth-form">
+        <label class="auth-field">
+          <span>Логин</span>
+          <input name="login" required autocomplete="username" placeholder="admin">
+        </label>
+        <label class="auth-field">
+          <span>Пароль</span>
+          <input name="password" type="password" required autocomplete="current-password" minlength="8">
+        </label>
+        <div class="auth-captcha">
+          <div class="auth-captcha__row">
+            <div class="auth-captcha__visual" id="gate-captcha-visual" aria-hidden="true"></div>
+            <button type="button" class="auth-captcha__refresh" id="gate-captcha-refresh" title="Обновить" aria-label="Обновить капчу">↻</button>
+          </div>
+          <label class="auth-field">
+            <span>Капча</span>
+            <input type="text" name="captchaAnswer" inputmode="numeric" autocomplete="off" maxlength="4" placeholder="Ответ" required>
+          </label>
+          <input type="hidden" name="captchaId" value="">
+        </div>
+        <p class="auth-error" id="gate-error" hidden></p>
+        <button class="btn-auth btn-auth--solid btn-auth--wide" type="submit">Войти в панель</button>
+      </form>
+      <a class="admin-back" href="/">← На сайт</a>
+    </div>
+  </div>
+
+  <div id="admin-app" class="admin-app" hidden>
+    <aside class="admin-side">
+      <a class="logo" href="/">
+        <span class="logo__mark"></span>
+        <span class="logo__text">SOCCER<span>24</span></span>
+      </a>
+      <nav class="admin-nav">
+        <button type="button" class="is-on" data-tab="dash">Обзор</button>
+        <button type="button" data-tab="chat">Модерация чата</button>
+        <button type="button" data-tab="streams">Трансляции</button>
+        <button type="button" data-tab="users">Пользователи</button>
+        <button type="button" data-tab="pay">Платежи</button>
+      </nav>
+      <div class="admin-side__foot">
+        <div id="admin-who"></div>
+        <button type="button" class="btn-auth" id="admin-logout">Выйти</button>
+      </div>
+    </aside>
+
+    <main class="admin-main">
+      <header class="admin-top">
+        <h1 id="admin-heading">Обзор</h1>
+        <button type="button" class="btn-ghost" id="admin-refresh">Обновить</button>
+      </header>
+
+      <section class="admin-panel is-on" data-panel="dash">
+        <div class="admin-stats" id="admin-stats"></div>
+        <div class="admin-card">
+          <h2>Быстрый старт</h2>
+          <ol class="admin-steps">
+            <li>Откройте матч на сайте и скопируйте его ID из адресной строки браузера (или из карточки).</li>
+            <li>Во вкладке «Трансляции» вставьте ID матча и ссылку YouTube/Twitch.</li>
+            <li>В «Модерации чата» удаляйте токсичные сообщения и баньте пользователей.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="admin-panel" data-panel="chat" hidden>
+        <div class="admin-card">
+          <div class="admin-card__head">
+            <h2>Лента чатов</h2>
+            <span class="admin-hint">Автообновление каждые 4 сек</span>
+          </div>
+          <div id="mod-chat" class="mod-chat"></div>
+        </div>
+      </section>
+
+      <section class="admin-panel" data-panel="streams" hidden>
+        <div class="admin-grid-2">
+          <div class="admin-card">
+            <h2>Подключить эфир</h2>
+            <form id="stream-admin-form" class="auth-form">
+              <label class="auth-field">
+                <span>ID матча (fixture id)</span>
+                <input name="fixtureId" placeholder="например 1551006" required>
+              </label>
+              <label class="auth-field">
+                <span>Ссылка трансляции</span>
+                <input name="url" type="url" placeholder="https://youtube.com/watch?v=..." required>
+              </label>
+              <label class="auth-field">
+                <span>Название</span>
+                <input name="title" placeholder="Дерби · Live">
+              </label>
+              <p class="auth-error" id="stream-admin-err" hidden></p>
+              <p class="auth-ok" id="stream-admin-ok" hidden></p>
+              <button class="btn-auth btn-auth--solid btn-auth--wide" type="submit">Сохранить трансляцию</button>
+            </form>
+          </div>
+          <div class="admin-card">
+            <h2>Активные эфиры</h2>
+            <div id="admin-streams" class="admin-list"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="admin-panel" data-panel="users" hidden>
+        <div class="admin-card">
+          <h2>Пользователи</h2>
+          <div id="admin-users" class="admin-table-wrap"></div>
+        </div>
+      </section>
+
+      <section class="admin-panel" data-panel="pay" hidden>
+        <div class="admin-card">
+          <h2>Платежи подписки (45 ₽)</h2>
+          <div id="admin-pay" class="admin-table-wrap"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="admin.js"></script>
+</body>
+</html>

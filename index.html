@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SOCCER24</title>
+  <meta name="description" content="Футбольные матчи, live, таблицы и трансляции — SOCCER24">
+  <meta name="referrer" content="same-origin">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="is-booting">
+  <div id="boot-screen" class="boot" aria-live="polite">
+    <div class="boot__mark"></div>
+    <div class="boot__brand">SOCCER<span>24</span></div>
+    <div class="boot__bar"><i id="boot-bar"></i></div>
+    <p class="boot__hint">Загрузка…</p>
+  </div>
+
+  <div class="bg-glow" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="wrap topbar__inner">
+      <a class="logo" href="#matches" data-view="matches">
+        <span class="logo__mark"></span>
+        <span class="logo__text">SOCCER<span>24</span></span>
+      </a>
+
+      <nav class="nav" id="main-nav">
+        <button type="button" class="nav__btn is-active" data-view="matches">Матчи</button>
+        <button type="button" class="nav__btn" data-view="live">Live</button>
+        <button type="button" class="nav__btn" data-view="tables">Таблицы</button>
+        <button type="button" class="nav__btn" data-view="teams">Команды</button>
+      </nav>
+
+      <div class="topbar__right">
+        <div class="status-pill" id="api-pill">Онлайн</div>
+        <div class="auth-slot" id="auth-slot"></div>
+        <button type="button" class="burger" id="burger" aria-label="Меню">
+          <span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap page">
+    <section class="hero">
+      <div>
+        <p class="hero__eyebrow" id="hero-date"></p>
+        <h1 class="hero__title">Футбол.<br><em>Прямо сейчас.</em></h1>
+        <p class="hero__sub">Матчи, чат и трансляции. Подписка 45 ₽ — полный доступ к эфирам.</p>
+      </div>
+      <div class="hero__stats" id="hero-stats">
+        <div class="stat"><strong id="stat-total">—</strong><span>матчей</span></div>
+        <div class="stat"><strong id="stat-live">—</strong><span>live</span></div>
+        <div class="stat"><strong id="stat-leagues">—</strong><span>лиг</span></div>
+      </div>
+    </section>
+
+    <section class="view is-on" id="view-matches" data-panel="matches">
+      <div class="toolbar">
+        <div class="dates" id="date-tabs"></div>
+        <div class="filters">
+          <select id="league-filter" class="select">
+            <option value="all">Все лиги</option>
+          </select>
+          <div class="seg" id="status-filter">
+            <button type="button" class="seg__btn is-on" data-status="all">Все</button>
+            <button type="button" class="seg__btn" data-status="NS">Скоро</button>
+            <button type="button" class="seg__btn" data-status="LIVE">Идут</button>
+            <button type="button" class="seg__btn" data-status="FT">Счёт</button>
+          </div>
+        </div>
+      </div>
+      <div class="grid-main">
+        <div id="fixtures-feed" class="feed">
+          <div class="empty">Загрузка матчей…</div>
+        </div>
+        <aside class="rail">
+          <article class="card">
+            <h2 class="card__title">Live сейчас</h2>
+            <div id="live-mini" class="live-mini"><div class="empty empty--sm">Нет live</div></div>
+          </article>
+          <article class="card">
+            <div class="card__head">
+              <h2 class="card__title">Таблица</h2>
+              <select id="rail-league" class="select select--sm"></select>
+            </div>
+            <div id="rail-table" class="table-wrap"><div class="empty empty--sm">Загрузка…</div></div>
+          </article>
+        </aside>
+      </div>
+    </section>
+
+    <section class="view" id="view-live" data-panel="live" hidden>
+      <div class="section-head">
+        <h2>Прямой эфир</h2>
+        <button type="button" class="btn-ghost" id="refresh-live">Обновить</button>
+      </div>
+      <div id="live-feed" class="feed feed--solo">
+        <div class="empty">Загрузка live…</div>
+      </div>
+    </section>
+
+    <section class="view" id="view-tables" data-panel="tables" hidden>
+      <div class="section-head">
+        <h2>Турнирные таблицы</h2>
+        <select id="tables-league" class="select"></select>
+      </div>
+      <p class="hint" id="tables-hint"></p>
+      <div id="tables-full" class="card card--pad table-wrap">
+        <div class="empty">Выберите лигу…</div>
+      </div>
+    </section>
+
+    <section class="view" id="view-teams" data-panel="teams" hidden>
+      <div class="section-head">
+        <h2>Команды</h2>
+        <select id="teams-league" class="select"></select>
+      </div>
+      <div id="teams-grid" class="teams">
+        <div class="empty">Загрузка клубов…</div>
+      </div>
+    </section>
+  </main>
+
+  <dialog class="sheet sheet--match" id="sheet">
+    <div class="sheet__panel">
+      <button type="button" class="sheet__close" id="sheet-close" aria-label="Закрыть">×</button>
+      <div id="sheet-body"></div>
+    </div>
+  </dialog>
+
+  <dialog class="sheet sheet--auth" id="auth-sheet">
+    <div class="sheet__panel sheet__panel--auth auth-gate">
+      <button type="button" class="sheet__close" id="auth-close" aria-label="Закрыть" hidden>×</button>
+
+      <div id="auth-step-form">
+        <div class="auth-brand">
+          <span class="logo__mark"></span>
+          <strong>SOCCER<span>24</span></strong>
+        </div>
+        <h2 class="auth-title" id="auth-title">Вход</h2>
+        <p class="auth-lead" id="auth-lead">Войдите, чтобы пользоваться сайтом</p>
+        <div class="auth-tabs" id="auth-tabs">
+          <button type="button" class="auth-tabs__btn is-on" data-mode="login">Вход</button>
+          <button type="button" class="auth-tabs__btn" data-mode="register">Регистрация</button>
+          <button type="button" class="auth-tabs__btn" data-mode="profile" hidden id="auth-tab-profile">Профиль</button>
+        </div>
+        <form id="auth-form" class="auth-form" autocomplete="on">
+          <label class="auth-field auth-field--email" hidden>
+            <span>Почта</span>
+            <input type="email" name="email" maxlength="120" autocomplete="email" placeholder="you@mail.com">
+          </label>
+          <label class="auth-field auth-field--login">
+            <span>Логин</span>
+            <input type="text" name="login" required minlength="3" maxlength="24" pattern="[a-zA-Z0-9_]+" autocomplete="username" placeholder="username">
+          </label>
+          <label class="auth-field auth-field--pass">
+            <span>Пароль</span>
+            <input type="password" name="password" required minlength="8" maxlength="64" autocomplete="current-password" placeholder="••••••••">
+            <small class="auth-hint auth-hint--reg" hidden>Не меньше 8 символов</small>
+          </label>
+          <label class="auth-field auth-field--pass2" hidden>
+            <span>Повтор пароля</span>
+            <input type="password" name="password2" minlength="8" maxlength="64" autocomplete="new-password" placeholder="••••••••">
+          </label>
+          <label class="auth-field auth-field--name" hidden>
+            <span>Отображаемое имя</span>
+            <input type="text" name="name" minlength="2" maxlength="40" placeholder="Как вас видеть в чате">
+          </label>
+          <div class="auth-captcha" id="auth-captcha">
+            <div class="auth-captcha__row">
+              <div class="auth-captcha__visual" id="auth-captcha-visual" aria-hidden="true"></div>
+              <button type="button" class="auth-captcha__refresh" id="auth-captcha-refresh" title="Обновить" aria-label="Обновить капчу">↻</button>
+            </div>
+            <label class="auth-field">
+              <span>Капча</span>
+              <input type="text" name="captchaAnswer" inputmode="numeric" autocomplete="off" maxlength="4" placeholder="Ответ" required>
+            </label>
+            <input type="hidden" name="captchaId" value="">
+          </div>
+          <div class="auth-profile-box" id="auth-profile-box" hidden></div>
+          <p class="auth-ok" id="auth-ok" hidden></p>
+          <p class="auth-error" id="auth-error" hidden></p>
+          <button type="submit" class="btn-auth btn-auth--solid btn-auth--wide" id="auth-submit">Войти</button>
+          <p class="auth-legal">Продолжая, вы принимаете <a href="/terms.html" target="_blank" rel="noopener">соглашение</a> и <a href="/offer.html" target="_blank" rel="noopener">оферту</a>.</p>
+        </form>
+      </div>
+
+      <div id="auth-step-sub" hidden>
+        <h2 class="auth-title">Подписка SOCCER24</h2>
+        <p class="auth-lead">Оформите подписку, чтобы смотреть трансляции матчей.</p>
+        <div class="sub-card">
+          <div class="sub-card__price">45 ₽</div>
+          <div class="sub-card__term">на 30 дней</div>
+          <ul class="sub-card__list">
+            <li>Просмотр всех трансляций</li>
+            <li>Чат во время матчей</li>
+            <li>Без рекламных ограничений в плеере</li>
+          </ul>
+          <button type="button" class="btn-auth btn-auth--solid btn-auth--wide" id="btn-buy-sub">Купить за 45 ₽</button>
+          <button type="button" class="btn-auth btn-auth--wide" id="btn-skip-sub">Позже</button>
+          <p class="auth-error" id="sub-error" hidden></p>
+        </div>
+      </div>
+    </div>
+  </dialog>
+
+  <footer class="foot">
+    <div class="wrap foot__grid">
+      <div class="foot__brand">
+        <div class="logo logo--sm">
+          <span class="logo__mark"></span>
+          <span class="logo__text">SOCCER<span>24</span></span>
+        </div>
+        <p>Футбол, live и трансляции. Подписка 45 ₽ / 30 дней.</p>
+      </div>
+      <div class="foot__cols">
+        <div>
+          <h3>Документы</h3>
+          <a href="/terms.html">Пользовательское соглашение</a>
+          <a href="/offer.html">Публичная оферта</a>
+          <a href="/privacy.html">Политика конфиденциальности</a>
+        </div>
+        <div>
+          <h3>Сервис</h3>
+          <a href="/admin.html">Админ-панель</a>
+          <a href="mailto:support@soccer24.local">Поддержка</a>
+        </div>
+      </div>
+      <p class="foot__copy">© 2026 Soccer24. Все права защищены.</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
